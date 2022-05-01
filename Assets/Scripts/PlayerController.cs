@@ -10,30 +10,18 @@ public class PlayerController : MonoBehaviour
     //カメラ
     private Camera cam;
 
-    //歩き速度
-    public float walkSpeed = 4f;
-    //走りスピード
-    public float runSpeed = 8f;
+    private float x;
+    private float z;
+    public float Speed = 1.0f;
+    private Vector3 latestPos;
+
+    //回転速度
+    public  float smooth = 150f;
     //入力された値格納
     private Vector3 moveDir;
-    //進方向格納
-    private Vector3 movement;
-    //実際の移動速度
-    private float activeMoveSpeed = 4f;
-    //ジャンプ力
-    public Vector3 jumpForce = new Vector3(0,6,0);
-    //視点移動の速度
-    public float mouseSensitivity = 1f;
-    //ユーザーのマウス入力格納
-    private Vector2 mouseInpt;
-    //y軸の回転格納
-    private float verticalMouseInput;
 
     //レイを飛ばすオブジェクトの位置
     public Transform groundCheckPoint;
-
-    //地面レイヤー
-    public LayerMask groundLayers;
 
     private Rigidbody rb;
     Animator animator;
@@ -54,106 +42,52 @@ public class PlayerController : MonoBehaviour
         //移動関数を呼ぶ
         PlayerMove();
 
-        //視点移動関数の呼び出し
-        PlayerRotate();
-
-        //地面に足がついていれば
-        if (IsGround())
-        {
-            //走り関数呼び出し
-            Run();
-
-            //ジャンプ関数を呼ぶ
-            Jump();
-        }
         //攻撃入力
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Attack();
         }
-
+        //防御入力
+        Defend();
+        
         animator.SetFloat("Speed",rb.velocity.magnitude);
 
         //アニメーター遷移
-        AnimatorSet();
-
+        //AnimatorSet();
     }
-
-    private void LateUpdate()
-    {
-        //カメラの位置調節
-        cam.transform.position = viewPoint.position;
-        //回転
-        cam.transform.rotation = viewPoint.rotation;
-    }
-
     public void PlayerMove()
     {
-        //移動キーの入力検知して値を格納する
-        moveDir = new Vector3(Input.GetAxisRaw("Horizontal"),0,
-            Input.GetAxisRaw("Vertical"));
+        x = Input.GetAxisRaw("Horizontal");
+        z = Input.GetAxisRaw("Vertical");
 
-        //進方向を出して変数に格納
-        movement = ((transform.forward * moveDir.z) + (transform.right * moveDir.x)).normalized;
+        Vector3 diff = transform.position - latestPos;           //Playerの位置座標を毎フレーム最後に取得する
+        latestPos = transform.position;　　　　　　　　　　　　　//Palyerの位置座標を更新する　
 
-        //現在位置に反映していく
-        transform.position += movement * activeMoveSpeed * Time.deltaTime;
-    }
+        rb.velocity = new Vector3(x, 0, z) * Speed;　　　　　　　//歩く速度　　
+        //animator.SetFloat("Walk", rb.velocity.magnitude);        //歩くアニメーションに切り替える
 
-    public void PlayerRotate()
-    {
-        //変数にユーザーのマウスの動きを格納
-        mouseInpt = new Vector2(Input.GetAxisRaw("Mouse X") * mouseSensitivity,
-            Input.GetAxisRaw("Mouse Y") * mouseSensitivity);
-
-        //マウスのｘ軸の動きを反映
-        transform.rotation = Quaternion.Euler(transform.eulerAngles.x,
-            transform.eulerAngles.y + mouseInpt.x,
-            transform.eulerAngles.z);
-
-        //ｙ軸の値に現在の値を足す
-        verticalMouseInput += mouseInpt.y;
-
-        //数値を丸める
-        verticalMouseInput = Mathf.Clamp(verticalMouseInput, -60f,60f);
-
-        //viewpointに丸めた数値を反映
-        viewPoint.rotation = Quaternion.Euler(-verticalMouseInput,
-            viewPoint.transform.rotation.eulerAngles.y,
-            viewPoint.transform.rotation.eulerAngles.z);
-    }
-
-    public bool IsGround()
-    {
-        //判定してbool値を返す
-        return Physics.Raycast(groundCheckPoint.position,Vector3.down,0.25f,groundLayers);
-    }
-
-    public void Jump()
-    {
-        //地面についていて、スペースキーが押されたとき
-        if (IsGround()&&Input.GetKeyDown(KeyCode.Space))
+        if (diff.magnitude > 0.01f)
         {
-            rb.AddForce(jumpForce,ForceMode.Impulse);
+            //キーを押し方向転換
+            Quaternion rotation = Quaternion.LookRotation(diff);
+            transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * smooth);
         }
     }
-
-    public void Run()
-    {
-        //シフト押されている間スピード切り替える
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            activeMoveSpeed = runSpeed;
-        }
-        else
-        {
-            activeMoveSpeed = walkSpeed;
-        }
-    }
-
     void Attack()
     {
         animator.SetTrigger("Attack");
+    }
+
+    void Defend()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            animator.SetBool("defend", true);
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            animator.SetBool("defend", false);
+        }
     }
 
     private void AnimatorSet()
@@ -168,17 +102,5 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetBool("Walk", false);
         }
-
-        /*
-        //run判定
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            animator.SetBool("run", true);
-        }
-        else
-        {
-            animator.SetBool("run", false);
-        }*/
-
     }
 }
