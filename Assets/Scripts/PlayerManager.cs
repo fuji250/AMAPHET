@@ -150,7 +150,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public  void Attack()
     {
         animator.SetTrigger("Attack");
-        Debug.Log("攻撃した");
+        //Debug.Log("攻撃した");
     }
 
     void Defend()
@@ -201,15 +201,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     //被ダメージ（全プレイヤー共有）
     [PunRPC]
-    void Damage(int damage)
+    void Hurt(int damage)
     {
-        animator.SetTrigger("Hurt");
-        if (photonView.IsMine)
-        {
-            if (isDie)
+        if (isDie)
             {
                 return;
             }
+        animator.SetTrigger("Hurt");
+
+        if (photonView.IsMine)
+        {
             hp -= damage;
             if (hp <= 0)
             {
@@ -239,6 +240,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!photonView.IsMine)
+        {
+            return;
+        }
         if (hp <= 0)
         {
             return;
@@ -247,23 +252,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         if (other.CompareTag("Weapon"))
         {
             //DamageManagerを持つコライダーにぶつかった際に攻撃を受ける
-        DamageManager damageManager = other.GetComponent<DamageManager>();
-        if (damageManager != null)
-        {
-        Debug.Log("敵にダメージを与えた2");
-
-            if (animator.GetBool("Defend"))
+            DamageManager damageManager = other.GetComponent<DamageManager>();
+            if (damageManager != null)
             {
-                Debug.Log("敵の攻撃を防いだ！");
-                return;
-            }
-            //ダメージを与えるものにぶつかったら
+                Debug.Log("敵にダメージを与えた2");
+
+                if (animator.GetBool("Defend"))
+                {
+                    Debug.Log("敵の攻撃を防いだ！");
+                    return;
+                }
+                //ダメージを与えるものにぶつかったら
                 
-            //Damage(damageManager.damage);
-             photonView.RPC("Damage",
-             RpcTarget.All,
-             damageManager.damage);
-        }
+                //Damage(damageManager.damage);
+                 photonView.RPC("Hurt",
+                 RpcTarget.All,
+                 damageManager.damage);
+            }
         }
         
     }

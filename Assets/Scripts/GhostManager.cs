@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class GhostManager : MonoBehaviour
+
+public class GhostManager : MonoBehaviourPunCallbacks
 {
     //カメラの親オブジェクト
     public Transform viewPoint;
@@ -38,10 +40,20 @@ public class GhostManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!photonView.IsMine)
+        {
+            return;
+        }
+
         //攻撃入力
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Invoke(nameof(Attack), 2.0f);
+            //Invoke(nameof(Attack), 2.0f);
+            //Invoke(nameof(photonView.RPC("Attack", RpcTarget.All)), 2.0f);
+            //photonView.RPC("Invoke(nameof(Attack), 2.0f)",RpcTarget.All);
+            photonView.RPC("Attack",RpcTarget.All);
+            //StartCoroutine(photonView.RPC(("Attack", RpcTarget.All)));
+
         }
         //防御入力
         StartCoroutine("Defend");
@@ -55,8 +67,11 @@ public class GhostManager : MonoBehaviour
         animator.SetFloat("Speed",rb.velocity.magnitude);
 
     }
-    void Attack()
+    [PunRPC]
+    IEnumerator Attack()
     {
+        yield return new WaitForSeconds(2.0f);
+
         animator.SetTrigger("Attack");
     }
 
@@ -99,8 +114,11 @@ public class GhostManager : MonoBehaviour
         weaponCollider.enabled = true;
     }
 
-    void Damage(int damage)
+    [PunRPC]
+    void Hurt(int damage)
     {
+        //yield return new WaitForSeconds(2.0f);
+
         hp -= damage;
         if (hp <= 0)
         {
@@ -115,17 +133,37 @@ public class GhostManager : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!photonView.IsMine)
+        {
+            return;
+        }
         if (hp <= 0)
         {
             return;
         }
 
-        DamageManager damager = other.GetComponent<DamageManager>();
-        if (damager != null) 
+        if (other.CompareTag("Weapon"))
         {
-            //ダメージを与えるものにぶつかったら
-            animator.SetTrigger("Hurt");
-            Damage(damager.damage);
+            //DamageManagerを持つコライダーにぶつかった際に攻撃を受ける
+            DamageManager damageManager = other.GetComponent<DamageManager>();
+            if (damageManager != null)
+            {
+                Debug.Log("敵にダメージを与えた2");
+
+                if (animator.GetBool("Defend"))
+                {
+                    Debug.Log("敵の攻撃を防いだ！");
+                    return;
+                }
+                //ダメージを与えるものにぶつかったら
+                
+                //Hurt(damageManager.damage);
+
+                 photonView.RPC("Hurt",
+                 RpcTarget.All,
+                 damageManager.damage);
+            }
         }
+        
     }
 }
