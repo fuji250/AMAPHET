@@ -1321,10 +1321,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewPoint: {fileID: 75313036340209731}
   moveSpeed: 3
+  animator: {fileID: 0}
+  ghostManager: {fileID: 0}
   weaponCollider: {fileID: 373995659947794143}
   smooth: 150
-  groundCheckPoint: {fileID: 75313036070940992}
-  maxHp: 200
+  maxHp: 50
   maxStamina: 100
 --- !u!54 &3407591527352153531
 Rigidbody:

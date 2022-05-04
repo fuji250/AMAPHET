@@ -14,33 +14,43 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private Rigidbody rb;
     Animator animator;
-
+    Animator matesAnimator;
+    public PlayerManager playerManager;
     public Collider weaponCollider;
 
-    public  int maxHp = 100;
     int hp;
 
+    float delayTime = 2.0f;
+
     bool isDie;
+    bool isMateDie;
 
-
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
+        hp = PlayerManager.instance.maxHp;
+
+        
+        //matesAnimator = playerManager.animator;
 
         HideColliderWeapn();
 
 
         //カメラ格納
         cam = Camera.main;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!photonView.IsMine)
+        if (!photonView.IsMine || isDie)
         {
             return;
         }
@@ -57,48 +67,41 @@ public class GhostManager : MonoBehaviourPunCallbacks
         }
         //防御入力
         StartCoroutine("Defend");
-        //Defend();
-        /*
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            Invoke(nameof(Defend), 2.0f);
-        }*/
 
         animator.SetFloat("Speed",rb.velocity.magnitude);
-
     }
+
     [PunRPC]
     IEnumerator Attack()
     {
-        yield return new WaitForSeconds(2.0f);
-
+        yield return new WaitForSeconds(delayTime);
         animator.SetTrigger("Attack");
     }
 
-    /*
-    void Defend()
-    {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            animator.SetBool("Defend", true);
-        }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            animator.SetBool("Defend", false);
-        }
-    }
-    /*/
-
     IEnumerator Defend()
     {
+        /*
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(delayTime);
             animator.SetBool("Defend", true);
         }
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            yield return new WaitForSeconds(2.0f);
+            yield return new WaitForSeconds(delayTime);
+            animator.SetBool("Defend", false);
+        }
+        */
+
+        //プレイヤーがガードしていれば遅れてガード
+        if (playerManager.animator.GetBool("Defend"))
+        {
+            yield return new WaitForSeconds(delayTime);
+            animator.SetBool("Defend", true);
+        }
+        else
+        {
+            yield return new WaitForSeconds(delayTime);
             animator.SetBool("Defend", false);
         }
     }
@@ -117,30 +120,49 @@ public class GhostManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void Hurt(int damage)
     {
-        //yield return new WaitForSeconds(2.0f);
+        animator.SetTrigger("Hurt");
 
         hp -= damage;
         if (hp <= 0)
         {
-            hp = 0;
-            isDie = true;
-            animator.SetTrigger("Die");
-            //gameOverText.SetActive(true);
-            rb.velocity = Vector3.zero;
+            //死亡関数
+            Death(damage);
         }
-        Debug.Log("残りHP" + hp);
+        //Debug.Log("残りHP" + hp);
+    }
+
+    public void Death(int damage)
+    {
+        hp = 0;
+        isDie = true;
+        animator.SetTrigger("Die");
+        //gameOverText.SetActive(true);
+        rb.velocity = Vector3.zero;
+
+        //キルデスイベント呼び出し
+        //gameManager.ScoreGet(PhotonNetwork.LocalPlayer.ActorNumber,1,1);
+        //gameManager.ScoreSet(actor,0,1);
+    }
+
+    public bool CheckDeath()
+    {
+        if (isMateDie)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!photonView.IsMine)
+        if (!photonView.IsMine　|| hp <= 0)
         {
             return;
         }
-        if (hp <= 0)
-        {
-            return;
-        }
+
 
         if (other.CompareTag("Weapon"))
         {
@@ -148,7 +170,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)
             {
-                Debug.Log("敵にダメージを与えた2");
+                Debug.Log("敵にダメージを与えられた");
 
                 if (animator.GetBool("Defend"))
                 {
@@ -156,12 +178,12 @@ public class GhostManager : MonoBehaviourPunCallbacks
                     return;
                 }
                 //ダメージを与えるものにぶつかったら
-                
                 //Hurt(damageManager.damage);
-
+                
                  photonView.RPC("Hurt",
                  RpcTarget.All,
                  damageManager.damage);
+                
             }
         }
         

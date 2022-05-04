@@ -6,8 +6,8 @@ TagManager:
   tags:
   - SpawnManager
   - UIManager
-  - Undefined
   - Weapon
+  - GameManager
   layers:
   - Default
   - TransparentFX

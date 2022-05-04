@@ -42,9 +42,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6245238755453077603}
   - component: {fileID: 6245238755462899647}
+  - component: {fileID: 6005113438945536562}
   - component: {fileID: 6245238755453506622}
   - component: {fileID: 6245238755453506620}
-  - component: {fileID: 6005113438945536562}
   - component: {fileID: 39016660128842280}
   - component: {fileID: 1700836730175282355}
   - component: {fileID: 6491281791929937486}
@@ -94,6 +94,21 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &6005113438945536562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6245238755453506563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b503ab3dcb58d04c9fd54a3f024aa23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  viewPoint: {fileID: 8712821719820667334}
+  playerManager: {fileID: 0}
+  weaponCollider: {fileID: 8993981946300366682}
 --- !u!54 &6245238755453506622
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -124,21 +139,6 @@ CapsuleCollider:
   m_Height: 1.3
   m_Direction: 1
   m_Center: {x: 0, y: 0.66, z: 0}
---- !u!114 &6005113438945536562
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6245238755453506563}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b503ab3dcb58d04c9fd54a3f024aa23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  viewPoint: {fileID: 8712821719820667334}
-  weaponCollider: {fileID: 8993981946300366682}
-  maxHp: 100
 --- !u!114 &39016660128842280
 MonoBehaviour:
   m_ObjectHideFlags: 0

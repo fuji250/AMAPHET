@@ -53,20 +53,6 @@ public class SpawnManager : MonoBehaviour
     //ランダムにスポーンポイントの一つを選択する関数
     public Transform GetSpawnPoint()
     {
-        /*
-        if (firstSpawned == false)
-        {
-            Debug.Log("firstSpawned" + firstSpawned);
-
-            firstSpawned = true;
-
-            return spawnPoints[0];
-        }
-        else
-        {
-            return spawnPoints[1];
-        }
-        */
         if (PhotonNetwork.IsMasterClient)
         {
             firstSpawned = true;
@@ -75,9 +61,7 @@ public class SpawnManager : MonoBehaviour
         else
         {
             return spawnPoints[1];
-
         }
-
     }
 
     //ネットワークオブジェクトとしてプレイヤーを生成する
@@ -91,6 +75,10 @@ public class SpawnManager : MonoBehaviour
         //ネットワークオブジェクト生成
         ghost = PhotonNetwork.Instantiate(ghostPrefab.name, spawnPoint.position,
             spawnPoint.rotation);
+
+        //それぞれにスクリプトを取得
+        player.GetComponent<PlayerManager>().ghostManager = ghost.GetComponent<GhostManager>();
+        ghost.GetComponent<GhostManager>().playerManager = player.GetComponent<PlayerManager>();
     }
 
     public void SpawnMotionManager()

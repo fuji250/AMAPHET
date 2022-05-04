@@ -11,80 +11,88 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     //カメラ
     private Camera cam;
 
+    //移動
     private float x;
     private float z;
     public float moveSpeed = 1.0f;
     private Vector3 latestPos;
 
+    private Rigidbody rb;
+    public Animator animator;
+    public GhostManager ghostManager;
     public Collider weaponCollider;
     private PlayerUIManager playerUIManager;
     private SpawnManager spawnManager;
+    GameManager gameManager;
+
 
     //回転速度
     public  float smooth = 150f;
     //入力された値格納
     private Vector3 moveDir;
 
-    //レイを飛ばすオブジェクトの位置
-    public Transform groundCheckPoint;
 
-    
+    //体力スタミナ
     public  int maxHp = 100;
     int hp;
     public  int maxStamina = 100;
     float stamina;
+    //生きているかどうか
     bool isDie;
 
-    private Rigidbody rb;
-    Animator animator;
+    
 
+    //Spawn直後のずれを抑えるフラグ
     bool firstMoment = false;
+
+    // どこからでも使えるようにする
+    public static PlayerManager instance;
 
     private void Awake()
     {
+        instance = this;
+
         //SpawnMangaer格納
         spawnManager = GameObject.FindGameObjectWithTag("SpawnManager").GetComponent<SpawnManager>();
         //UIManager格納
         playerUIManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<PlayerUIManager>();
+        //GameManager格納
+        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         
+        rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        //HPとスタミナの初期化
         hp = maxHp;
         stamina = maxStamina;
 
+        //UIの初期化
         playerUIManager.Init(this);
 
 
-        rb = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
+        
 
-
+        //武器の当たり判定を消す
         HideColliderWeapn();
 
         //カメラ格納
         cam = Camera.main;
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!photonView.IsMine)
-        {
-            return;
-        }
-        if (isDie)
+        if (!photonView.IsMine || isDie)
         {
             return;
         }
 
         //移動関数を呼ぶ
         PlayerMove();
-        //StartCoroutine(PlayerMove());
-
 
         //攻撃入力
         if (Input.GetKeyDown(KeyCode.Space))
@@ -95,40 +103,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         }
         //防御入力
         Defend();
-        //photonView.RPC("Defend",
-        //            RpcTarget.All);
         
+        //歩きアニメーションの判定
         animator.SetFloat("Speed",rb.velocity.magnitude);
 
+        //スタミナの自動回復
         IncreaseStamina();
-
-        //アニメーター遷移
-        //AnimatorSet();
     }
+
     public void PlayerMove()
     {
-        
-        // 3秒間待つ
-        //yield return new WaitForSeconds(3);
-
         x = Input.GetAxisRaw("Horizontal");
         z = Input.GetAxisRaw("Vertical");
 
         Vector3 diff = transform.position - latestPos;           //Playerの位置座標を毎フレーム最後に取得する
-        
-        latestPos = transform.position;　　　　　　　　　　　　　//Palyerの位置座標を更新する　
-
+        latestPos = transform.position;　　　　　　　　　　　　　//Palyerの位置座標を更新する
         rb.velocity = new Vector3(x, 0, z) * moveSpeed;　　　　　　　//歩く速度
 
-        /*
-        if (firstMoment)
-        {
-            //diff = transform.position;
-            firstMoment = true;
-            return;
-        }
-        */
-        
         //こいつのせいで回転しとる！！
         if (diff.magnitude > 0.01f)
         {
@@ -136,7 +127,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             {
                 firstMoment = true;
                 diff = new Vector3(0,0,0);
-                Debug.Log(diff);
                 return;
             }
             //キーを押し方向転換
@@ -150,7 +140,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public  void Attack()
     {
         animator.SetTrigger("Attack");
-        //Debug.Log("攻撃した");
     }
 
     void Defend()
@@ -203,30 +192,16 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void Hurt(int damage)
     {
-        if (isDie)
-            {
-                return;
-            }
         animator.SetTrigger("Hurt");
 
-        if (photonView.IsMine)
+        hp -= damage;
+        if (hp <= 0)
         {
-            hp -= damage;
-            if (hp <= 0)
-            {
-                //死亡関数
-                Death(damage);
-            }
-            //playerUIManager.UpdateHP(hp);
-            Debug.Log("残りHP" + hp);
+            //死亡関数
+            Death(damage);
         }
-        else
-        {
-        
-
-        }
+        //Debug.Log("残りHP" + hp);
     }
-
 
     //死亡関数
     public void Death(int damage)
@@ -236,15 +211,15 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         animator.SetTrigger("Die");
         //gameOverText.SetActive(true);
         rb.velocity = Vector3.zero;
+
+        //キルデスイベント呼び出し
+        gameManager.ScoreGet(PhotonNetwork.LocalPlayer.ActorNumber,1,1);
+        //gameManager.ScoreSet(actor,0,1);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!photonView.IsMine)
-        {
-            return;
-        }
-        if (hp <= 0)
+        if (!photonView.IsMine　|| hp <= 0)
         {
             return;
         }
@@ -255,21 +230,19 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)
             {
-                Debug.Log("敵にダメージを与えた2");
+                //Debug.Log("敵にダメージを与えられた");
 
                 if (animator.GetBool("Defend"))
                 {
-                    Debug.Log("敵の攻撃を防いだ！");
+                    //Debug.Log("敵の攻撃を防いだ！");
                     return;
                 }
+
                 //ダメージを与えるものにぶつかったら
-                
-                //Damage(damageManager.damage);
                  photonView.RPC("Hurt",
                  RpcTarget.All,
                  damageManager.damage);
             }
         }
-        
     }
 }
