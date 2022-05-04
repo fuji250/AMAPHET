@@ -17,6 +17,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
     Animator matesAnimator;
     public PlayerManager playerManager;
     public Collider weaponCollider;
+    GameManager gameManager;
 
     int hp;
 
@@ -29,15 +30,14 @@ public class GhostManager : MonoBehaviourPunCallbacks
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
+        //GameManager格納
+        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
         hp = PlayerManager.instance.maxHp;
-
-        
-        //matesAnimator = playerManager.animator;
 
         HideColliderWeapn();
 
@@ -58,12 +58,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
         //攻撃入力
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //Invoke(nameof(Attack), 2.0f);
-            //Invoke(nameof(photonView.RPC("Attack", RpcTarget.All)), 2.0f);
-            //photonView.RPC("Invoke(nameof(Attack), 2.0f)",RpcTarget.All);
             photonView.RPC("Attack",RpcTarget.All);
-            //StartCoroutine(photonView.RPC(("Attack", RpcTarget.All)));
-
         }
         //防御入力
         StartCoroutine("Defend");
@@ -80,19 +75,6 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     IEnumerator Defend()
     {
-        /*
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            yield return new WaitForSeconds(delayTime);
-            animator.SetBool("Defend", true);
-        }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            yield return new WaitForSeconds(delayTime);
-            animator.SetBool("Defend", false);
-        }
-        */
-
         //プレイヤーがガードしていれば遅れてガード
         if (playerManager.animator.GetBool("Defend"))
         {
@@ -118,7 +100,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    void Hurt(int damage)
+    void Hurt(int damage, string name,int actor)
     {
         animator.SetTrigger("Hurt");
 
@@ -126,12 +108,12 @@ public class GhostManager : MonoBehaviourPunCallbacks
         if (hp <= 0)
         {
             //死亡関数
-            Death(damage);
+            Death(name, actor);
         }
         //Debug.Log("残りHP" + hp);
     }
 
-    public void Death(int damage)
+    public void Death(string name, int actor)
     {
         hp = 0;
         isDie = true;
@@ -140,50 +122,36 @@ public class GhostManager : MonoBehaviourPunCallbacks
         rb.velocity = Vector3.zero;
 
         //キルデスイベント呼び出し
-        //gameManager.ScoreGet(PhotonNetwork.LocalPlayer.ActorNumber,1,1);
-        //gameManager.ScoreSet(actor,0,1);
-    }
-
-    public bool CheckDeath()
-    {
-        if (isMateDie)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        gameManager.ScoreGet(PhotonNetwork.LocalPlayer.ActorNumber,1,1);
+        gameManager.ScoreGet(actor,0,1);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!photonView.IsMine　|| hp <= 0)
+        if (!photonView.IsMine　|| hp <= 0 || 
+            other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
         {
             return;
         }
 
-
-        if (other.CompareTag("Weapon"))
+        if (other.gameObject.tag == "Weapon")
         {
             //DamageManagerを持つコライダーにぶつかった際に攻撃を受ける
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)
             {
-                Debug.Log("敵にダメージを与えられた");
 
                 if (animator.GetBool("Defend"))
                 {
-                    Debug.Log("敵の攻撃を防いだ！");
+                    //Debug.Log("敵の攻撃を防いだ！");
                     return;
                 }
+                //Debug.Log("敵にダメージを与えられた");
+
                 //ダメージを与えるものにぶつかったら
-                //Hurt(damageManager.damage);
-                
-                 photonView.RPC("Hurt",
-                 RpcTarget.All,
-                 damageManager.damage);
-                
+                 photonView.RPC("Hurt",RpcTarget.All,
+                     damageManager.damage, other.transform.root.gameObject.GetPhotonView().Owner.NickName,
+                     PhotonNetwork.PlayerListOthers[0].ActorNumber);
             }
         }
         

@@ -48,6 +48,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     // どこからでも使えるようにする
     public static PlayerManager instance;
 
+    public List<Renderer> renderers = new List<Renderer>();//武器の格納配列
+
+    //public GameObject[] playerModel;//プレイヤーモデルを格納
+    public Renderer[] myselfHolder;//Materialホルダー
+
     private void Awake()
     {
         instance = this;
@@ -73,14 +78,46 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         //UIの初期化
         playerUIManager.Init(this);
 
-
-        
-
         //武器の当たり判定を消す
         HideColliderWeapn();
 
         //カメラ格納
         cam = Camera.main;
+
+        renderers.Clear();//初期化
+
+        if (!photonView.IsMine)//自分じゃなかったら
+        {
+            /*
+            foreach (var model in playerModel)//モデルのパーツ分ループ
+            {
+                model.SetActive(false);//非表示
+            }
+            */
+            foreach (Renderer renderer in myselfHolder)//Materialの数分ループ
+            {
+                renderers.Add(renderer);//リストに追加
+            }
+
+            
+            foreach (Renderer mesh in renderers)//リスト分ループを回す
+            {
+                mesh.material.color = new Color32(255,255,255,0);//透明にする
+            }
+
+            //uIManager.UpdateHP(maxHP, currentHp);//HPをスライダーに反映
+
+        }/*
+        else//他人だったらotherPlayerHolderを表示させる
+        {
+            foreach (Material material in otherPlayerHolder)//Materialの数分ループ
+            {
+                materials.Add(material);//リストに追加
+            }
+        }
+        */
+
+        //switchGun();//銃を表示させるため
     }
 
     // Update is called once per frame
@@ -190,7 +227,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     //被ダメージ（全プレイヤー共有）
     [PunRPC]
-    void Hurt(int damage)
+    void Hurt(int damage, string name,int actor)
     {
         animator.SetTrigger("Hurt");
 
@@ -198,13 +235,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         if (hp <= 0)
         {
             //死亡関数
-            Death(damage);
+            Death(name, actor);
         }
         //Debug.Log("残りHP" + hp);
     }
 
     //死亡関数
-    public void Death(int damage)
+    public void Death(string name, int actor)
     {
         hp = 0;
         isDie = true;
@@ -214,34 +251,35 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
         //キルデスイベント呼び出し
         gameManager.ScoreGet(PhotonNetwork.LocalPlayer.ActorNumber,1,1);
-        //gameManager.ScoreSet(actor,0,1);
+        gameManager.ScoreGet(actor,0,1);
     }
+
+    
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!photonView.IsMine　|| hp <= 0)
+        if (!photonView.IsMine　|| hp <= 0 ||
+            other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
         {
             return;
         }
 
-        if (other.CompareTag("Weapon"))
+        if (other.gameObject.tag == "Weapon")
         {
             //DamageManagerを持つコライダーにぶつかった際に攻撃を受ける
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)
             {
-                //Debug.Log("敵にダメージを与えられた");
-
                 if (animator.GetBool("Defend"))
                 {
                     //Debug.Log("敵の攻撃を防いだ！");
                     return;
                 }
-
+                Debug.Log("敵にダメージを与えられた");
                 //ダメージを与えるものにぶつかったら
-                 photonView.RPC("Hurt",
-                 RpcTarget.All,
-                 damageManager.damage);
+                 photonView.RPC("Hurt",RpcTarget.All,
+                     damageManager.damage, other.transform.root.gameObject.GetPhotonView().Owner.NickName,
+                     PhotonNetwork.PlayerListOthers[0].ActorNumber);
             }
         }
     }

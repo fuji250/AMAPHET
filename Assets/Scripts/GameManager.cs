@@ -35,6 +35,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public GameState state;//状態を格納
 
+    public int TargetNumber = 1;//クリアするまでのキル数
+
 
 
     private void Start()
@@ -247,6 +249,32 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 break;//処理はできたのでこれ以降for文を回さないためにブレイクする
             }
         }
+        TargetScoreCheck();
+    }
+
+    void TargetScoreCheck()
+    {
+        bool clear = false;
+
+        foreach (PlayerInfo player in playerList)//人数分ループ
+        {
+            if (player.kills >= TargetNumber && TargetNumber > 0)//条件判定
+            {
+                clear = true;//クリア判定
+                break;//ループ抜ける
+            }
+        }
+
+
+        if (clear)//クリア判定
+        {
+            if (PhotonNetwork.IsMasterClient && state != GameState.Ending)
+            {
+                state = GameState.Ending;//状態変更
+                ListPlayersGet();//最終的なプレイヤー情報を更新
+            }
+        }
+
 
     }
 

@@ -1327,6 +1327,11 @@ MonoBehaviour:
   smooth: 150
   maxHp: 50
   maxStamina: 100
+  renderers: []
+  myselfHolder:
+  - {fileID: 3407591527355267326}
+  - {fileID: 1942468417967797831}
+  - {fileID: 373995659947794136}
 --- !u!54 &3407591527352153531
 Rigidbody:
   m_ObjectHideFlags: 0
