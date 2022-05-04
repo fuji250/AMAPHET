@@ -12,6 +12,10 @@ public class SpawnManager : MonoBehaviour
     public GameObject playerPrefab;
     //生成したプレイヤーオブジェクト
     GameObject player;
+    //生成するゴーストオブジェクト
+    public GameObject ghostPrefab;
+    //生成したゴーストオブジェクト
+    GameObject ghost;
 
     
 
@@ -49,7 +53,21 @@ public class SpawnManager : MonoBehaviour
     //ランダムにスポーンポイントの一つを選択する関数
     public Transform GetSpawnPoint()
     {
+        /*
         if (firstSpawned == false)
+        {
+            Debug.Log("firstSpawned" + firstSpawned);
+
+            firstSpawned = true;
+
+            return spawnPoints[0];
+        }
+        else
+        {
+            return spawnPoints[1];
+        }
+        */
+        if (PhotonNetwork.IsMasterClient)
         {
             firstSpawned = true;
             return spawnPoints[0];
@@ -57,7 +75,9 @@ public class SpawnManager : MonoBehaviour
         else
         {
             return spawnPoints[1];
+
         }
+
     }
 
     //ネットワークオブジェクトとしてプレイヤーを生成する
@@ -68,6 +88,9 @@ public class SpawnManager : MonoBehaviour
         //ネットワークオブジェクト生成
         player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position,
             spawnPoint.rotation);
+        //ネットワークオブジェクト生成
+        ghost = PhotonNetwork.Instantiate(ghostPrefab.name, spawnPoint.position,
+            spawnPoint.rotation);
     }
 
     public void SpawnMotionManager()
@@ -75,5 +98,7 @@ public class SpawnManager : MonoBehaviour
         //ネットワークオブジェクト生成
         motionManager = PhotonNetwork.Instantiate(motionManagerPrefab.name, new Vector3(0,0,0),
             Quaternion.identity);
+        motionManager.GetComponent<Forgevision.InputCapture.MotionRecorder>()._recordHead = player.transform;
+        motionManager.GetComponent<Forgevision.InputCapture.MotionPlayer>()._targetHead = ghost.transform;
     }
 }

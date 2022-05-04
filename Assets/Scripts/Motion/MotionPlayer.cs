@@ -10,7 +10,7 @@ namespace Forgevision.InputCapture
 
         //モーション再生する対象
         [SerializeField]
-        Transform _targetHead;
+        public Transform _targetHead;
         //[SerializeField]
         //Transform _targetRight;
         //[SerializeField]
@@ -19,17 +19,6 @@ namespace Forgevision.InputCapture
         float _startTime = 0f;
         float _delayTimeSec = 0f;
 
-        //SpawnPoint格納配列作成
-        public Transform[] spawnPoints;
-
-        //生成するゴーストオブジェクト
-        public GameObject ghostPrefab;
-        //生成したゴーストオブジェクト
-        GameObject ghost;
-
-        bool firstSpawned = false;
-
-    
         enum PlayState
         {
             NONE,
@@ -40,13 +29,6 @@ namespace Forgevision.InputCapture
 
         private void Start()
         {
-            
-            //生成関数呼び出し
-            if (PhotonNetwork.IsConnected)
-            {
-                //ネットワークオブジェクトとしてプレイヤーを生成する
-                SpawnGhost();
-            }
 
         }
 
@@ -137,27 +119,5 @@ namespace Forgevision.InputCapture
             playState = PlayState.STOP;
         }
 
-        public Transform GetSpawnPoint()
-        {
-            if (firstSpawned == false)
-            {
-                firstSpawned = true;
-                return spawnPoints[0];
-            }
-            else
-            {
-                return spawnPoints[1];
-            }
-        }
-
-        public void SpawnGhost()
-        {
-            //適切なスポーンポジションを変数に格納
-            Transform spawnPoint = GetSpawnPoint();
-            //ネットワークオブジェクト生成
-            ghost = PhotonNetwork.Instantiate(ghostPrefab.name, spawnPoint.position,
-                spawnPoint.rotation);
-            _targetHead = ghost.transform;
-        }
     }
 }

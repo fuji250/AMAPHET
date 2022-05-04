@@ -38,7 +38,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     private Rigidbody rb;
     Animator animator;
 
-    
+    bool firstMoment = false;
 
     private void Awake()
     {
@@ -83,6 +83,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
         //移動関数を呼ぶ
         PlayerMove();
+        //StartCoroutine(PlayerMove());
+
 
         //攻撃入力
         if (Input.GetKeyDown(KeyCode.Space))
@@ -105,20 +107,43 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     }
     public void PlayerMove()
     {
+        
+        // 3秒間待つ
+        //yield return new WaitForSeconds(3);
+
         x = Input.GetAxisRaw("Horizontal");
         z = Input.GetAxisRaw("Vertical");
 
         Vector3 diff = transform.position - latestPos;           //Playerの位置座標を毎フレーム最後に取得する
+        
         latestPos = transform.position;　　　　　　　　　　　　　//Palyerの位置座標を更新する　
 
         rb.velocity = new Vector3(x, 0, z) * moveSpeed;　　　　　　　//歩く速度
 
+        /*
+        if (firstMoment)
+        {
+            //diff = transform.position;
+            firstMoment = true;
+            return;
+        }
+        */
+        
+        //こいつのせいで回転しとる！！
         if (diff.magnitude > 0.01f)
         {
+            if (!firstMoment)
+            {
+                firstMoment = true;
+                diff = new Vector3(0,0,0);
+                Debug.Log(diff);
+                return;
+            }
             //キーを押し方向転換
             Quaternion rotation = Quaternion.LookRotation(diff);
             transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * smooth);
         }
+        
     }
 
     [PunRPC]

@@ -7,7 +7,7 @@ namespace Forgevision.InputCapture
 
         //録画するオブジェクトの対象
         [SerializeField]
-        Transform _recordHead; 
+        public  Transform _recordHead; 
         //[SerializeField]
         //Transform _recordRight;
         //[SerializeField]

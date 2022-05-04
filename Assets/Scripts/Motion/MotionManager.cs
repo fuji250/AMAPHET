@@ -13,6 +13,7 @@ namespace Forgevision.InputCapture
         {
             _motionRecorder.StartRecord(_motionClip);
             _motionPlayer.MotionPlay(_motionClip, _delayTimeSec);
+            
         }
     }
 }

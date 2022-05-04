@@ -61,8 +61,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetHead: {fileID: 6245238755453077603, guid: 57dc59212f187c64b8b4363ba786540e, type: 3}
-  spawnPoints: []
-  ghostPrefab: {fileID: 0}
 --- !u!114 &7164605592392128011
 MonoBehaviour:
   m_ObjectHideFlags: 0
