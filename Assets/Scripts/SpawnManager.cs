@@ -10,9 +10,16 @@ public class SpawnManager : MonoBehaviour
 
     //生成するプレイヤーオブジェクト
     public GameObject playerPrefab;
-    
     //生成したプレイヤーオブジェクト
     GameObject player;
+
+    
+
+    //生成するMotionManagerオブジェクト
+    public GameObject motionManagerPrefab;
+    
+    //生成したプレイヤーオブジェクト
+    GameObject motionManager;
 
     //スポーンまでのインターバル
     public float respawnInterval = 5f;
@@ -34,6 +41,8 @@ public class SpawnManager : MonoBehaviour
         {
             //ネットワークオブジェクトとしてプレイヤーを生成する
             SpawnPlayer();
+
+            SpawnMotionManager();
         }
     }
 
@@ -54,11 +63,17 @@ public class SpawnManager : MonoBehaviour
     //ネットワークオブジェクトとしてプレイヤーを生成する
     public void SpawnPlayer()
     {
-        //ランダムなスポーンポジションを変数に格納
+        //適切なスポーンポジションを変数に格納
         Transform spawnPoint = GetSpawnPoint();
-
         //ネットワークオブジェクト生成
         player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position,
             spawnPoint.rotation);
+    }
+
+    public void SpawnMotionManager()
+    {
+        //ネットワークオブジェクト生成
+        motionManager = PhotonNetwork.Instantiate(motionManagerPrefab.name, new Vector3(0,0,0),
+            Quaternion.identity);
     }
 }

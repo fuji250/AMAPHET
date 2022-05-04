@@ -1,20 +1,25 @@
 using UnityEngine;
+
 namespace Forgevision.InputCapture
 {
     public class MotionRecorder : MonoBehaviour
     {
+
         //録画するオブジェクトの対象
         [SerializeField]
         Transform _recordHead; 
-        [SerializeField]
-        Transform _recordRight;
-        [SerializeField]
-        Transform _recordLeft;
+        //[SerializeField]
+        //Transform _recordRight;
+        //[SerializeField]
+        //Transform _recordLeft;
         MotionClip _motionClip;
         float _startTime;
         float _timer = 0f;
         //モーションの1秒あたりのキー数
         readonly int _recordFPS = 30;
+
+        
+
         enum RecordState
         {
             NONE,
@@ -22,10 +27,14 @@ namespace Forgevision.InputCapture
             STOP
         }
         RecordState recordState = RecordState.NONE;
+
+        
+
         void Update()
         {
             CaptureUpdate();
         }
+
         void CaptureUpdate()
         {
             switch (recordState)
@@ -48,6 +57,7 @@ namespace Forgevision.InputCapture
                 {
                     _motionClip.headCurve.AddKeyPostionAndRotation(playTime, _recordHead.position, _recordHead.rotation);
                 }
+                /*
                 if (_recordRight != null)
                 {
                     _motionClip.rightCurve.AddKeyPostionAndRotation(playTime, _recordRight.position, _recordRight.rotation);
@@ -56,6 +66,7 @@ namespace Forgevision.InputCapture
                 {
                     _motionClip.leftCurve.AddKeyPostionAndRotation(playTime, _recordLeft.position, _recordLeft.rotation);
                 }
+                */
             }
             _timer += Time.deltaTime;
         }
@@ -71,5 +82,7 @@ namespace Forgevision.InputCapture
         {
             recordState = RecordState.STOP;
         }
+
+        
     }
 }

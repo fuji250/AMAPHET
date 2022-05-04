@@ -1,18 +1,34 @@
 using UnityEngine;
+using Photon.Pun;
+
 namespace Forgevision.InputCapture
 {
     public class MotionPlayer : MonoBehaviour
     {
+        //SpawnManager spawnManager;
+
+
         //モーション再生する対象
         [SerializeField]
         Transform _targetHead;
-        [SerializeField]
-        Transform _targetRight;
-        [SerializeField]
-        Transform _targetLeft;
+        //[SerializeField]
+        //Transform _targetRight;
+        //[SerializeField]
+        //Transform _targetLeft;
         MotionClip _motionClip;
         float _startTime = 0f;
         float _delayTimeSec = 0f;
+
+        //SpawnPoint格納配列作成
+        public Transform[] spawnPoints;
+
+        //生成するゴーストオブジェクト
+        public GameObject ghostPrefab;
+        //生成したゴーストオブジェクト
+        GameObject ghost;
+
+        bool firstSpawned = false;
+
     
         enum PlayState
         {
@@ -21,6 +37,19 @@ namespace Forgevision.InputCapture
             PLAYING
         }
         PlayState playState = PlayState.NONE;
+
+        private void Start()
+        {
+            
+            //生成関数呼び出し
+            if (PhotonNetwork.IsConnected)
+            {
+                //ネットワークオブジェクトとしてプレイヤーを生成する
+                SpawnGhost();
+            }
+
+        }
+
         void Update()
         {
             MotionUpdate();
@@ -52,6 +81,7 @@ namespace Forgevision.InputCapture
                     , _motionClip.headCurve.rot_zCurve.Evaluate(playTime)
                     , _motionClip.headCurve.rot_wCurve.Evaluate(playTime)));
             }
+            /*
             if (_targetRight != null)
             {
                 _targetRight.SetPositionAndRotation(
@@ -74,11 +104,19 @@ namespace Forgevision.InputCapture
                     , _motionClip.leftCurve.rot_zCurve.Evaluate(playTime)
                     , _motionClip.leftCurve.rot_wCurve.Evaluate(playTime)));
             }
+            */
         }
         //_delayTime_sec秒遅れて再生させる。
         public void MotionPlay(MotionClip motionClip, float delayTimeSec =1f)
         {           
+            /*
             if (_targetHead == null && _targetRight == null && _targetLeft == null)
+            {
+                Debug.LogWarning("モーション再生対象が設定されていません。");
+                return;
+            }
+            */
+            if (_targetHead == null)
             {
                 Debug.LogWarning("モーション再生対象が設定されていません。");
                 return;
@@ -97,6 +135,29 @@ namespace Forgevision.InputCapture
             }
             Debug.Log("モーション停止。");
             playState = PlayState.STOP;
+        }
+
+        public Transform GetSpawnPoint()
+        {
+            if (firstSpawned == false)
+            {
+                firstSpawned = true;
+                return spawnPoints[0];
+            }
+            else
+            {
+                return spawnPoints[1];
+            }
+        }
+
+        public void SpawnGhost()
+        {
+            //適切なスポーンポジションを変数に格納
+            Transform spawnPoint = GetSpawnPoint();
+            //ネットワークオブジェクト生成
+            ghost = PhotonNetwork.Instantiate(ghostPrefab.name, spawnPoint.position,
+                spawnPoint.rotation);
+            _targetHead = ghost.transform;
         }
     }
 }
