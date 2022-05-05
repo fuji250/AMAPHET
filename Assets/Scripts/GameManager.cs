@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public int TargetNumber = 1;//クリアするまでのキル数
 
-    public float waitAfterEnding = 5f;//終了してからの待機時間
+    public float waitAfterEnding = 2f;//終了してからの待機時間
 
     private void Awake()
     {
@@ -280,9 +280,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
                 ListPlayersGet();//最終的なプレイヤー情報を更新
             }
         }
-
-
     }
+
     void StateCheck()
     {
         if (state == GameState.Ending)//状態の判定
