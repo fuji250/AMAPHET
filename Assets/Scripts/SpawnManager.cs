@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using System;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -28,9 +29,6 @@ public class SpawnManager : MonoBehaviour
     //スポーンまでのインターバル
     public float respawnInterval = 5f;
 
-
-    bool firstSpawned = false;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -51,16 +49,18 @@ public class SpawnManager : MonoBehaviour
     }
 
     //ランダムにスポーンポイントの一つを選択する関数
-    public Transform GetSpawnPoint()
+    public Tuple<Transform, int> GetSpawnPoint()
     {
         if (PhotonNetwork.IsMasterClient)
         {
-            firstSpawned = true;
-            return spawnPoints[0];
+            var result = Tuple.Create<Transform, int>(spawnPoints[0],0);
+            return result;
         }
         else
         {
-            return spawnPoints[1];
+            //return spawnPoints[1];
+            var result = Tuple.Create<Transform, int>(spawnPoints[1],1);
+            return result;
         }
     }
 
@@ -68,7 +68,10 @@ public class SpawnManager : MonoBehaviour
     public void SpawnPlayer()
     {
         //適切なスポーンポジションを変数に格納
-        Transform spawnPoint = GetSpawnPoint();
+        Tuple<Transform, int> tuple = GetSpawnPoint();
+        Transform spawnPoint = tuple.Item1;
+        int spawnPointNum = tuple.Item2;
+
         //ネットワークオブジェクト生成
         player = PhotonNetwork.Instantiate(playerPrefab.name, spawnPoint.position,
             spawnPoint.rotation);
@@ -79,6 +82,7 @@ public class SpawnManager : MonoBehaviour
         //それぞれにスクリプトを取得
         player.GetComponent<PlayerManager>().ghostManager = ghost.GetComponent<GhostManager>();
         ghost.GetComponent<GhostManager>().playerManager = player.GetComponent<PlayerManager>();
+        player.GetComponent<PlayerManager>().spawnPointNumber = spawnPointNum;
     }
 
     public void SpawnMotionManager()

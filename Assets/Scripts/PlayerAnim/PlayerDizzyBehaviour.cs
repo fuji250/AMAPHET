@@ -2,20 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAttackBehaviour : StateMachineBehaviour
+public class PlayerDizzyBehaviour : StateMachineBehaviour
 {
-    int alph = 0;
-
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (animator.GetComponent<PlayerManager>() != null)
         {
-            alph = 0;
-
             animator.GetComponent<PlayerManager>().moveSpeed = 0;
-            //animator.GetComponent<PlayerManager>().Appear();
-            animator.GetComponent<PlayerManager>().StartCoroutine("GradationAppear");
+            animator.GetComponent<PlayerManager>().Appear();
 
         }
     }
@@ -23,7 +18,7 @@ public class PlayerAttackBehaviour : StateMachineBehaviour
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-
+        
     }
 
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
@@ -32,9 +27,7 @@ public class PlayerAttackBehaviour : StateMachineBehaviour
         if (animator.GetComponent<PlayerManager>() != null)
         {
             animator.GetComponent<PlayerManager>().moveSpeed = 3.0f;
-            animator.GetComponent<PlayerManager>().HideColliderWeapn();
-            animator.GetComponent<PlayerManager>().StartCoroutine("Disappear");
-
+            animator.GetComponent<PlayerManager>().Disappear();
         }
     }
 

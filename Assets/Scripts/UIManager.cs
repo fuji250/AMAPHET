@@ -5,10 +5,13 @@ using UnityEngine.UI;
 using DG.Tweening;
 
 
-public class PlayerUIManager : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
     //public Slider hpSlider;
     public Slider staminaSlider;
+
+    //試合終了パネル
+    public GameObject endPanel;
 
     public void Init(PlayerManager playerManager)
     {
@@ -24,5 +27,11 @@ public class PlayerUIManager : MonoBehaviour
     public void UpdateStamina(float stamina)
     {
         staminaSlider.DOValue(stamina,0.3f);
+    }
+
+    //試合終了パネル表示
+    public void OpenEndPanel()
+    {
+        endPanel.SetActive(true);
     }
 }

@@ -21,7 +21,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public Animator animator;
     public GhostManager ghostManager;
     public Collider weaponCollider;
-    private PlayerUIManager playerUIManager;
+    private UIManager UIManager;
     private SpawnManager spawnManager;
     GameManager gameManager;
 
@@ -53,6 +53,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     //public GameObject[] playerModel;//プレイヤーモデルを格納
     public Renderer[] myselfHolder;//Materialホルダー
 
+    public int spawnPointNumber;
+
     private void Awake()
     {
         instance = this;
@@ -60,7 +62,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         //SpawnMangaer格納
         spawnManager = GameObject.FindGameObjectWithTag("SpawnManager").GetComponent<SpawnManager>();
         //UIManager格納
-        playerUIManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<PlayerUIManager>();
+        UIManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
         //GameManager格納
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         
@@ -76,48 +78,35 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         stamina = maxStamina;
 
         //UIの初期化
-        playerUIManager.Init(this);
+        UIManager.Init(this);
 
         //武器の当たり判定を消す
         HideColliderWeapn();
 
-        //カメラ格納
-        cam = Camera.main;
-
         renderers.Clear();//初期化
+
+        
 
         if (!photonView.IsMine)//自分じゃなかったら
         {
-            /*
-            foreach (var model in playerModel)//モデルのパーツ分ループ
-            {
-                model.SetActive(false);//非表示
-            }
-            */
             foreach (Renderer renderer in myselfHolder)//Materialの数分ループ
             {
                 renderers.Add(renderer);//リストに追加
             }
 
-            
-            foreach (Renderer mesh in renderers)//リスト分ループを回す
-            {
-                mesh.material.color = new Color32(255,255,255,0);//透明にする
-            }
+            Disappear();
 
             //uIManager.UpdateHP(maxHP, currentHp);//HPをスライダーに反映
 
-        }/*
-        else//他人だったらotherPlayerHolderを表示させる
-        {
-            foreach (Material material in otherPlayerHolder)//Materialの数分ループ
-            {
-                materials.Add(material);//リストに追加
-            }
         }
-        */
-
-        //switchGun();//銃を表示させるため
+        else
+        {
+            //カメラ格納
+            cam = Camera.main;
+            //カメラをプレイヤーの子にするのではなく、スクリプトで位置を合わせる
+            cam.transform.position = viewPoint.position;
+            cam.transform.rotation = viewPoint.rotation;
+        }
     }
 
     // Update is called once per frame
@@ -155,7 +144,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
         Vector3 diff = transform.position - latestPos;           //Playerの位置座標を毎フレーム最後に取得する
         latestPos = transform.position;　　　　　　　　　　　　　//Palyerの位置座標を更新する
-        rb.velocity = new Vector3(x, 0, z) * moveSpeed;　　　　　　　//歩く速度
+        if (spawnPointNumber == 0)
+        {
+            rb.velocity = new Vector3(x, 0, z) * moveSpeed;　　　　　　　//歩く速度
+        }
+        else if(spawnPointNumber == 1)
+        {
+            rb.velocity = new Vector3(x, 0, z) * -moveSpeed;　　　　　　　//歩く速度
+        }
 
         //こいつのせいで回転しとる！！
         if (diff.magnitude > 0.01f)
@@ -211,7 +207,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         {
             stamina = maxStamina;
         }
-        playerUIManager.UpdateStamina(stamina);
+        UIManager.UpdateStamina(stamina);
     }
 
     //武器の判定を有効にしたり・無効にしたりする関数
@@ -223,6 +219,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public void ShowColliderWeapn()
     {
         weaponCollider.enabled = true;
+    }
+
+    [PunRPC]
+    public void Repelled()
+    {
+        animator.SetTrigger("Repelled");
     }
 
     //被ダメージ（全プレイヤー共有）
@@ -255,24 +257,59 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     }
 
     
+    public IEnumerator GradationAppear()
+    {
+        for (int i = 0; i < 255; i += 45)
+        {
+            foreach (Renderer mesh in renderers)//リスト分ループを回す
+            {
+                mesh.material.color = mesh.material.color + new Color32(0,0,0,45);
+                    
+                Debug.Log(mesh.material.color);
+                yield return new WaitForSeconds(0.01f);
+            }
+        }
+    }
+
+    public void Appear()
+    {
+        foreach (Renderer mesh in renderers)//リスト分ループを回す
+            {
+                mesh.material.color = new Color32(255,255,255,255);
+            }
+    }
+
+    public void Disappear()
+    {
+        foreach (Renderer mesh in renderers)//リスト分ループを回す
+            {
+                mesh.material.color = new Color32(255,255,255,0);//透明にする
+            }
+    }
+
+
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!photonView.IsMine　|| hp <= 0 ||
-            other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
+        if (!photonView.IsMine　|| hp <= 0)
         {
             return;
         }
 
         if (other.gameObject.tag == "Weapon")
         {
+            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
+            {
+                return;
+            }
             //DamageManagerを持つコライダーにぶつかった際に攻撃を受ける
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)
             {
                 if (animator.GetBool("Defend"))
                 {
-                    //Debug.Log("敵の攻撃を防いだ！");
+                    Debug.Log("敵の攻撃を防いだ！");
+                    other.transform.root.gameObject.GetPhotonView().RPC("Repelled",RpcTarget.All);
                     return;
                 }
                 Debug.Log("敵にダメージを与えられた");

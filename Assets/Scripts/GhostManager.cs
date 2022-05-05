@@ -100,6 +100,12 @@ public class GhostManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
+    public void Repelled()
+    {
+        animator.SetTrigger("Repelled");
+    }
+
+    [PunRPC]
     void Hurt(int damage, string name,int actor)
     {
         animator.SetTrigger("Hurt");
@@ -128,14 +134,17 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!photonView.IsMine@|| hp <= 0 || 
-            other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
+        if (!photonView.IsMine@|| hp <= 0)
         {
             return;
         }
 
         if (other.gameObject.tag == "Weapon")
         {
+            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
+            {
+                return;
+            }
             //DamageManager‚ğ‚ÂƒRƒ‰ƒCƒ_[‚É‚Ô‚Â‚©‚Á‚½Û‚ÉUŒ‚‚ğó‚¯‚é
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)
@@ -143,7 +152,8 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
                 if (animator.GetBool("Defend"))
                 {
-                    //Debug.Log("“G‚ÌUŒ‚‚ğ–h‚¢‚¾I");
+                    Debug.Log("“G‚ÌUŒ‚‚ğ–h‚¢‚¾I");
+                    other.transform.root.gameObject.GetPhotonView().RPC("Repelled",RpcTarget.All);
                     return;
                 }
                 //Debug.Log("“G‚Éƒ_ƒ[ƒW‚ğ—^‚¦‚ç‚ê‚½");

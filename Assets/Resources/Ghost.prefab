@@ -84,7 +84,7 @@ Animator:
   m_GameObject: {fileID: 6245238755453506563}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: a58d63122b09e9144938cd6a1ece4824, type: 3}
-  m_Controller: {fileID: 9100000, guid: e0c0f47587dd7b74b807c832004a83ce, type: 2}
+  m_Controller: {fileID: 9100000, guid: 4fa911cecdb96214eb8fe50af2b98cf0, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -212,6 +212,9 @@ MonoBehaviour:
   - Type: 4
     SynchronizeType: 1
     Name: Walk
+  - Type: 9
+    SynchronizeType: 0
+    Name: Repelled
   m_SynchronizeLayers:
   - SynchronizeType: 0
     LayerIndex: 0

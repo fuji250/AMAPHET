@@ -35,9 +35,16 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public GameState state;//状態を格納
 
+    UIManager uiManager;//UI
+
     public int TargetNumber = 1;//クリアするまでのキル数
 
+    public float waitAfterEnding = 5f;//終了してからの待機時間
 
+    private void Awake()
+    {
+        uiManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();//56
+    }
 
     private void Start()
     {
@@ -193,11 +200,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
 
             playerList.Add(player);//リストに追加
-
-
-
         }
 
+        //ゲームの状態を判定する関数
+        StateCheck();
     }
 
 
@@ -276,6 +282,47 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
         }
 
 
+    }
+    void StateCheck()
+    {
+        if (state == GameState.Ending)//状態の判定
+        {
+            EndGame();//終了関数を呼ぶ
+        }
+    }
+
+    /// <summary>
+    /// ゲーム終了関数
+    /// </summary>
+    void EndGame()
+    {
+        /*
+        if (PhotonNetwork.IsMasterClient)//マスターなら
+        {
+            PhotonNetwork.DestroyAll();//ネットワーク上から削除
+        }
+        */
+
+        //ゲーム終了パネル表示
+        uiManager.OpenEndPanel();
+
+        //スコア表示
+        //ShowScoreboard();
+        Invoke("ProcessingAfterCompletion",waitAfterEnding);
+    }
+
+
+    //終了後の処理
+    private void ProcessingAfterCompletion()
+    {
+        PhotonNetwork.AutomaticallySyncScene = false;//シーンの同期設定を切る
+        PhotonNetwork.LeaveRoom();//部屋を抜ける
+    }
+
+    public override void OnLeftRoom()
+    {
+        base.OnLeftRoom();
+        SceneManager.LoadScene(0);
     }
 
 }
