@@ -55,6 +55,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public string levelToPlay;//遷移先のシーン名
 
+    private const int MaxPlayerPerRoom = 2;
+
 
     private void Awake()
     {
@@ -133,7 +135,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         PhotonNetwork.NickName = Random.Range(0, 1000).ToString();//ユーザーネームをとりあえず適当に決める
 
 
-        ConfirmationName();//名前が入力されていればその名前を入力テキストに反映させる
+        //ConfirmationName();//名前が入力されていればその名前を入力テキストに反映させる
     }
 
 
@@ -159,7 +161,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             //ルームのオプションをインスタンス化して変数に入れる 
             RoomOptions options = new RoomOptions();
-            options.MaxPlayers = 6;// プレイヤーの最大参加人数の設定（無料版は20まで。1秒間にやり取りできるメッセージ数に限りがあるので10以上は難易度上がる）
+            options.MaxPlayers = 2;// プレイヤーの最大参加人数の設定（無料版は20まで。1秒間にやり取りできるメッセージ数に限りがあるので10以上は難易度上がる）
 
             //ルームを作る(ルーム名：部屋の設定)
             PhotonNetwork.CreateRoom(enterRoomName.text, options);
@@ -171,15 +173,27 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        Debug.Log("ルームを作成します。");
+        PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = MaxPlayerPerRoom });
+    }
 
     //ルームに参加したら呼ばれる関数
     public override void OnJoinedRoom()
     {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.NickName = "PLAYER1";
+        }
+        else
+        {
+            PhotonNetwork.NickName = "PLAYER2";
+        }
         CloseMenuUI();//一旦すべてを閉じる
         roomPanel.SetActive(true);//ルームパネル表示
 
         roomName.text = PhotonNetwork.CurrentRoom.Name;//現在いるルームを取得し、テキストにルーム名を反映
-
 
         GetAllPlayer();//ルームに参加しているプレイヤーを表示
 
@@ -355,7 +369,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
 
 
-
+    /*
     //名前の判定
     private void ConfirmationName()
     {
@@ -383,6 +397,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             PhotonNetwork.NickName = PlayerPrefs.GetString("playerName");
         }
     }
+    */
 
     //名前保存や入力判定切り替え。ボタンから呼ぶ
     public void SetName()
