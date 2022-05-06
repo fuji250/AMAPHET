@@ -146,11 +146,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         latestPos = transform.position;　　　　　　　　　　　　　//Palyerの位置座標を更新する
         if (spawnPointNumber == 0)
         {
-            rb.velocity = new Vector3(x, 0, z) * moveSpeed;　　　　　　　//歩く速度
+            rb.velocity = new Vector3(x, 0, z).normalized * moveSpeed;　　　　　　　//歩く速度
         }
         else if(spawnPointNumber == 1)
         {
-            rb.velocity = new Vector3(x, 0, z) * -moveSpeed;　　　　　　　//歩く速度
+            rb.velocity = new Vector3(x, 0, z).normalized * -moveSpeed;　　　　　　　//歩く速度
         }
 
         //こいつのせいで回転しとる！！
@@ -166,7 +166,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             Quaternion rotation = Quaternion.LookRotation(diff);
             transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * smooth);
         }
-        
     }
 
     [PunRPC]
@@ -192,7 +191,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         //スタミナが無くなればガードが外れる
         if (animator.GetBool("Defend"))
         {
-            stamina -= 0.1f;
+            stamina -= 50f * Time.deltaTime;
             if (stamina <= 0)
             {
                 animator.SetBool("Defend", false);
@@ -202,7 +201,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     void IncreaseStamina()
     {
-        stamina += 0.01f;
+        stamina += 20f * Time.deltaTime;;
         if(stamina >= maxStamina)
         {
             stamina = maxStamina;
