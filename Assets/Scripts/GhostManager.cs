@@ -15,16 +15,24 @@ public class GhostManager : MonoBehaviourPunCallbacks
     private Rigidbody rb;
     Animator animator;
     Animator matesAnimator;
-    public PlayerManager playerManager;
+    [System.NonSerialized] public PlayerManager playerManager;
     public Collider weaponCollider;
+    public GameObject barrier;
+
+    public GameObject atackChecker;
+    public GameObject barrierChecker;
     GameManager gameManager;
 
     int hp;
 
     public  float delayTime = 1.5f;
 
-    bool isDie;
-    bool isMateDie;
+    bool isDie = false;
+    //bool isMateDie;
+    bool isProtected = false;
+
+    public Transform barrierCheckPoint;//地面に向けてレイを飛ばすオブジェクト 
+    public LayerMask barrierLayers;//地面だと認識するレイヤー 
 
     private void Awake()
     {
@@ -40,6 +48,8 @@ public class GhostManager : MonoBehaviourPunCallbacks
         hp = PlayerManager.instance.maxHp;
 
         HideColliderWeapn();
+        atackChecker.SetActive(false);
+        barrierChecker.SetActive(false);
 
 
         //カメラ格納
@@ -132,6 +142,13 @@ public class GhostManager : MonoBehaviourPunCallbacks
         gameManager.ScoreGet(actor,0,1);
     }
 
+    public bool IsBarrier()
+    {
+        //Debug.Log("守られている");
+        return Physics.Raycast(barrierCheckPoint.position, Vector3.down, 1f, barrierLayers, QueryTriggerInteraction.Collide);
+    }
+
+
     private void OnTriggerEnter(Collider other)
     {
         if (!photonView.IsMine　|| hp <= 0)
@@ -150,7 +167,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
             if (damageManager != null)
             {
 
-                if (animator.GetBool("Defend"))
+                if (IsBarrier())
                 {
                     Debug.Log("敵の攻撃を防いだ！");
                     other.transform.root.gameObject.GetPhotonView().RPC("Repelled",RpcTarget.All);
@@ -163,6 +180,13 @@ public class GhostManager : MonoBehaviourPunCallbacks
                      damageManager.damage, other.transform.root.gameObject.GetPhotonView().Owner.NickName,
                      PhotonNetwork.PlayerListOthers[0].ActorNumber);
             }
+        }
+
+        if (other.gameObject.tag == "Barrier")
+        {
+            isProtected = true;
+            //Debug.Log("守られている");
+
         }
         
     }

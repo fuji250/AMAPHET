@@ -18,10 +18,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     private Vector3 latestPos;
 
     private Rigidbody rb;
-    public Animator animator;
-    public GhostManager ghostManager;
+    [System.NonSerialized] public Animator animator;
+    [System.NonSerialized] public GhostManager ghostManager;
     public Collider weaponCollider;
-    public Collider atackChecker;
+    public GameObject barrier;
+
+    public GameObject atackChecker;
+    public GameObject barrierChecker;
     private UIManager UIManager;
     private SpawnManager spawnManager;
     GameManager gameManager;
@@ -39,7 +42,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public  int maxStamina = 100;
     float stamina;
     //生きているかどうか
-    bool isDie;
+    bool isDie = false;
+    bool isProtected = false;
 
     
 
@@ -55,6 +59,9 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public Renderer[] myselfHolder;//Materialホルダー
 
     public int spawnPointNumber;
+
+    public Transform barrierCheckPoint;//地面に向けてレイを飛ばすオブジェクト 
+    public LayerMask barrierLayers;//地面だと認識するレイヤー 
 
     private void Awake()
     {
@@ -83,6 +90,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
         //武器の当たり判定を消す
         HideColliderWeapn();
+        atackChecker.SetActive(false);
+        barrierChecker.SetActive(false);
 
         renderers.Clear();//初期化
 
@@ -265,7 +274,6 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             {
                 mesh.material.color = mesh.material.color + new Color32(0,0,0,45);
                     
-                Debug.Log(mesh.material.color);
                 yield return new WaitForSeconds(0.01f);
             }
         }
@@ -287,6 +295,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             }
     }
 
+    public bool IsBarrier()
+    {
+        Debug.DrawRay(barrierCheckPoint.position, Vector3.down, Color.blue, 1f);
+        return Physics.Raycast(barrierCheckPoint.position, Vector3.down, 1f, barrierLayers);
+    }
+
 
 
     private void OnTriggerEnter(Collider other)
@@ -306,7 +320,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)
             {
-                if (animator.GetBool("Defend"))
+                //if (animator.GetBool("Defend"))
+                if (IsBarrier())
                 {
                     Debug.Log("敵の攻撃を防いだ！");
                     other.transform.root.gameObject.GetPhotonView().RPC("Repelled",RpcTarget.All);
@@ -319,5 +334,11 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                      PhotonNetwork.PlayerListOthers[0].ActorNumber);
             }
         }
+
+        if (other.gameObject.tag == "Barrier")
+        {
+            isProtected = true;
+        }
     }
+
 }

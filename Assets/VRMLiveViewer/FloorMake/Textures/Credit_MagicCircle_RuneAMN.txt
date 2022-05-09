@@ -1,0 +1,11 @@
+魔法陣の素材は以下に添付されているフリー素材を利用してます。
+
+ルーン文字フォント セット RuneAMN Series Fonts free
+https://daisy-bell.booth.pm/items/81865
+(daisybell-fonts)
+https://ja.osdn.net/projects/daisybell-fonts/releases/
+
+配布元のデイジィ・ベル様にもご確認頂き、使用・公開も問題無いと了承を得てます。
+
+更に加工・利用・配布などしたい場合は、オリジナルに添付されている利用規約（README_and_LICENSE.txt）に準じて頂ければ、自由に使って貰って構いません。
+

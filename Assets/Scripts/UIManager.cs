@@ -33,11 +33,13 @@ public class UIManager : MonoBehaviour
     {
         if (staminaSlider.value < 30f)
         {
-            staminaSliderColor.color = new Color32(69,120,153,255);
+            staminaSliderColor.color = new Color32(32,61,80,255);
+
         }
         else
         {
-            staminaSliderColor.color = new Color32(32,61,80,255);
+            staminaSliderColor.color = new Color32(69,120,153,255);
+
         }
     }
 

@@ -10,13 +10,18 @@ public class PlayerDefendBehaviour : StateMachineBehaviour
         if (animator.GetComponent<PlayerManager>() != null)
         {
             animator.GetComponent<PlayerManager>().moveSpeed = 0;
+            animator.GetComponent<PlayerManager>().barrierChecker.SetActive(true);
+            animator.GetComponent<PlayerManager>().barrier.SetActive(true);
         }
-        /*
+        
         if (animator.GetComponent<GhostManager>() != null)
         {
-            animator.GetComponent<GhostManager>().moveSpeed = 0;
+            animator.GetComponent<GhostManager>().barrierChecker.SetActive(true);
+            animator.GetComponent<GhostManager>().barrier.SetActive(true);
+
+
         }
-        */
+        
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -31,6 +36,16 @@ public class PlayerDefendBehaviour : StateMachineBehaviour
         if (animator.GetComponent<PlayerManager>() != null)
         {
             animator.GetComponent<PlayerManager>().moveSpeed = 3.0f;
+            animator.GetComponent<PlayerManager>().barrierChecker.SetActive(false);
+            animator.GetComponent<PlayerManager>().barrier.SetActive(false);
+
+
+        }
+        if (animator.GetComponent<GhostManager>() != null)
+        {
+            animator.GetComponent<GhostManager>().barrierChecker.SetActive(false);
+            animator.GetComponent<GhostManager>().barrier.SetActive(false);
+
         }
     }
 

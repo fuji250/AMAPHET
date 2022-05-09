@@ -15,9 +15,13 @@ public class PlayerAttackBehaviour : StateMachineBehaviour
             alph = 0;
 
             animator.GetComponent<PlayerManager>().moveSpeed = 0;
-            //animator.GetComponent<PlayerManager>().Appear();
             animator.GetComponent<PlayerManager>().StartCoroutine("GradationAppear");
-            animator.GetComponent<PlayerManager>().atackChecker.enabled = true;
+            animator.GetComponent<PlayerManager>().atackChecker.SetActive(true);
+        }
+        if (animator.GetComponent<GhostManager>() != null)
+        {
+            animator.GetComponent<GhostManager>().atackChecker.SetActive(true);
+
         }
     }
 
@@ -35,7 +39,11 @@ public class PlayerAttackBehaviour : StateMachineBehaviour
             animator.GetComponent<PlayerManager>().moveSpeed = 3.0f;
             animator.GetComponent<PlayerManager>().HideColliderWeapn();
             animator.GetComponent<PlayerManager>().StartCoroutine("Disappear");
-            animator.GetComponent<PlayerManager>().atackChecker.enabled = false;
+            animator.GetComponent<PlayerManager>().atackChecker.SetActive(false);
+        }
+        if (animator.GetComponent<GhostManager>() != null)
+        {
+            animator.GetComponent<GhostManager>().atackChecker.SetActive(false);
         }
     }
 
