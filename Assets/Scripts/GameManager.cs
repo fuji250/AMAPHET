@@ -37,9 +37,10 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     UIManager uiManager;//UI
 
+
     public int TargetNumber = 1;//クリアするまでのキル数
 
-    public float waitAfterEnding = 2f;//終了してからの待機時間
+    public float waitAfterEnding = 0.5f;//終了してからの待機時間
 
     private void Awake()
     {
@@ -286,7 +287,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
     {
         if (state == GameState.Ending)//状態の判定
         {
-            EndGame();//終了関数を呼ぶ
+            //EndGame();//終了関数を呼ぶ
+            Invoke("EndGame",2f);
         }
     }
 
@@ -304,10 +306,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
         //ゲーム終了パネル表示
         uiManager.OpenEndPanel();
+        //Invoke("uiManager.OpenEndPanel",1f);
 
         //スコア表示
         //ShowScoreboard();
         Invoke("ProcessingAfterCompletion",waitAfterEnding);
+        //ProcessingAfterCompletion();
     }
 
 

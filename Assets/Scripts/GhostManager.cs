@@ -21,7 +21,7 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
     int hp;
 
-    float delayTime = 2.0f;
+    public  float delayTime = 1.5f;
 
     bool isDie;
     bool isMateDie;

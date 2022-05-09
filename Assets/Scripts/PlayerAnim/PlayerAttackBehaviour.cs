@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PlayerAttackBehaviour : StateMachineBehaviour
 {
     int alph = 0;
@@ -16,7 +17,7 @@ public class PlayerAttackBehaviour : StateMachineBehaviour
             animator.GetComponent<PlayerManager>().moveSpeed = 0;
             //animator.GetComponent<PlayerManager>().Appear();
             animator.GetComponent<PlayerManager>().StartCoroutine("GradationAppear");
-
+            animator.GetComponent<PlayerManager>().atackChecker.enabled = true;
         }
     }
 
@@ -34,7 +35,7 @@ public class PlayerAttackBehaviour : StateMachineBehaviour
             animator.GetComponent<PlayerManager>().moveSpeed = 3.0f;
             animator.GetComponent<PlayerManager>().HideColliderWeapn();
             animator.GetComponent<PlayerManager>().StartCoroutine("Disappear");
-
+            animator.GetComponent<PlayerManager>().atackChecker.enabled = false;
         }
     }
 

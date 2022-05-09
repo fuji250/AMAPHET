@@ -75,7 +75,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _motionRecorder: {fileID: 7164605592392128013}
   _motionPlayer: {fileID: 7164605592392128010}
-  _delayTimeSec: 2
+  _delayTimeSec: 1.5
 --- !u!114 &-4137535316530021839
 MonoBehaviour:
   m_ObjectHideFlags: 0

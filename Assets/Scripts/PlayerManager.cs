@@ -21,6 +21,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public Animator animator;
     public GhostManager ghostManager;
     public Collider weaponCollider;
+    public Collider atackChecker;
     private UIManager UIManager;
     private SpawnManager spawnManager;
     GameManager gameManager;
@@ -177,7 +178,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     void Defend()
     {
         //スタミナが十分にあればガード
-        if (stamina >= 10f)
+        if (stamina >= 30f)
         {
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
