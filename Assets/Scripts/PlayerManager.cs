@@ -25,7 +25,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     public GameObject atackChecker;
     public GameObject barrierChecker;
-    private UIManager UIManager;
+    private UIManager uiManager;
     private SpawnManager spawnManager;
     GameManager gameManager;
 
@@ -70,7 +70,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         //SpawnMangaer格納
         spawnManager = GameObject.FindGameObjectWithTag("SpawnManager").GetComponent<SpawnManager>();
         //UIManager格納
-        UIManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
+        uiManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
         //GameManager格納
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         
@@ -86,7 +86,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         stamina = maxStamina;
 
         //UIの初期化
-        UIManager.Init(this);
+        uiManager.Init(this);
 
         //武器の当たり判定を消す
         HideColliderWeapn();
@@ -216,7 +216,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         {
             stamina = maxStamina;
         }
-        UIManager.UpdateStamina(stamina);
+        uiManager.UpdateStamina(stamina);
     }
 
     //武器の判定を有効にしたり・無効にしたりする関数
@@ -238,21 +238,22 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     //被ダメージ（全プレイヤー共有）
     [PunRPC]
-    void Hurt(int damage, string name,int actor)
+    void Hurt(int damage, string enymyName,int actor)
     {
         animator.SetTrigger("Hurt");
 
         hp -= damage;
         if (hp <= 0)
         {
+            string myName  = PhotonNetwork.NickName;
             //死亡関数
-            Death(name, actor);
+            Death(myName, enymyName, actor);
         }
         //Debug.Log("残りHP" + hp);
     }
 
     //死亡関数
-    public void Death(string name, int actor)
+    public void Death(string myName,string enymyName, int actor)
     {
         hp = 0;
         isDie = true;
@@ -263,6 +264,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         //キルデスイベント呼び出し
         gameManager.ScoreGet(PhotonNetwork.LocalPlayer.ActorNumber,1,1);
         gameManager.ScoreGet(actor,0,1);
+        uiManager.GetWinnerName(myName, enymyName);
     }
 
     

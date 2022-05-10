@@ -16,8 +16,8 @@ public class UIManager : MonoBehaviour
     public GameObject endPanel;
     public Text endText;
 
-    [NonSerialized]
-    public Text winnerPlayer;
+    [NonSerialized] public string winnerPlayerName = null;
+    private string myName;
 
     
 
@@ -29,6 +29,10 @@ public class UIManager : MonoBehaviour
         staminaSlider.value = playerManager.maxStamina;
     }
 
+    private void Start()
+    {
+        endPanel.SetActive(false);
+    }
     private void Update()
     {
         if (staminaSlider.value < 30f)
@@ -55,7 +59,22 @@ public class UIManager : MonoBehaviour
     //試合終了パネル表示
     public void OpenEndPanel()
     {
-        endText = winnerPlayer;
+        if (winnerPlayerName == myName)
+        {
+            endText.text = "WIN!";
+        }
+        else
+        {
+            endText.text = "LOSE...";
+
+        }
         endPanel.SetActive(true);
+    }
+
+    //勝利者の名前を取得する
+    public void GetWinnerName(string myName,string enemyName)
+    {
+        winnerPlayerName = enemyName;
+        this.myName = myName;
     }
 }
