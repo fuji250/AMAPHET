@@ -10,7 +10,10 @@ public class PhotonMaster : MonoBehaviourPunCallbacks
     private const int MaxPlayerPerRoom = 2;
 
     public GameObject loadingPanel;//ロードパネル
+    public GameObject preparationPanel;//ロードパネル
     public Text loadingText;//ロードテキスト
+    public GameObject startButton;
+
     //public GameObject buttons;//ボタン
     
     private void Awake()
@@ -20,6 +23,8 @@ public class PhotonMaster : MonoBehaviourPunCallbacks
     // Start is called before the first frame update
     private void Start()
     {   
+        Application.targetFrameRate = 60; 
+
         //ロードパネルを表示してテキスト更新
         loadingPanel.SetActive(true);
         loadingText.text = "ネットワークに接続中...";
@@ -31,6 +36,8 @@ public class PhotonMaster : MonoBehaviourPunCallbacks
             PhotonNetwork.ConnectUsingSettings();
         }
         
+        startButton.SetActive(false);
+
     }
 
     /// 一旦すべてを非表示にする
@@ -100,6 +107,8 @@ public class PhotonMaster : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        preparationPanel.SetActive(true);
+
         if (PhotonNetwork.IsMasterClient)
         {
             PhotonNetwork.NickName = "1P";
@@ -113,6 +122,7 @@ public class PhotonMaster : MonoBehaviourPunCallbacks
         if (playerCount != MaxPlayerPerRoom)
         {
             statusText.text = "対戦相手を待っています。";
+            CloseMenuUI();
         }
         else
         {
@@ -128,8 +138,15 @@ public class PhotonMaster : MonoBehaviourPunCallbacks
             {
                 PhotonNetwork.CurrentRoom.IsOpen = false;
                 statusText.text = "対戦相手が揃いました。バトルシーンに移動します。";
-                PhotonNetwork.LoadLevel("Main");
+                //PhotonNetwork.LoadLevel("Main");
+                startButton.SetActive(true);
             }
         }
+    }
+
+    public void GameStart()
+    {
+         PhotonNetwork.LoadLevel("Main");
+
     }
 }

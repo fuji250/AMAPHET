@@ -31,7 +31,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
 
     //回転速度
-    public  float smooth = 150f;
+    public  float smooth = 15f;
     //入力された値格納
     private Vector3 moveDir;
 
@@ -122,6 +122,12 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     // Update is called once per frame
     void Update()
     {
+        if (gameManager.state != GameManager.GameState.Playing)
+        {
+            return;
+        }
+        
+
         if (!photonView.IsMine || isDie)
         {
             return;
@@ -163,7 +169,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             rb.velocity = new Vector3(x, 0, z).normalized * -moveSpeed;　　　　　　　//歩く速度
         }
 
-        //こいつのせいで回転しとる！！
+        //こいつのせいでSpawn後回転しとる！！
         if (diff.magnitude > 0.01f)
         {
             if (!firstMoment)

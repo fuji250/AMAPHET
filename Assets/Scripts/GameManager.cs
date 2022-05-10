@@ -61,7 +61,9 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             NewPlayerGet(PhotonNetwork.NickName);
 
             //ó‘Ô‚ğƒQ[ƒ€’†‚Éİ’è‚·‚é
-            state = GameState.Playing;
+            //state = GameState.Playing;
+
+            //Invoke("StartGame",1f);
         }
     }
 
@@ -290,6 +292,11 @@ public class GameManager : MonoBehaviourPunCallbacks, IOnEventCallback
             //EndGame();//I—¹ŠÖ”‚ğŒÄ‚Ô
             Invoke("EndGame",2f);
         }
+    }
+
+    void StartGame()
+    {
+        state = GameState.Playing;
     }
 
     /// <summary>
