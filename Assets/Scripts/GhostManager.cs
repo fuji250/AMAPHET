@@ -158,7 +158,8 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
         if (other.gameObject.tag == "Weapon")
         {
-            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
+            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName == null ||
+                other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
             {
                 return;
             }
