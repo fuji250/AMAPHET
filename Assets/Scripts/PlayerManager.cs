@@ -190,8 +190,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public  void Attack()
     {
         animator.SetTrigger("Attack");
-        var attackEffectIns = Instantiate<GameObject>(attackEffect, latestPos, transform.rotation);
-        Destroy(attackEffectIns, 1f);
+        //var attackEffectIns = Instantiate<GameObject>(attackEffect, transform.position, transform.rotation);
+        //Destroy(attackEffectIns, 1f);
     }
 
     void Defend()
@@ -324,10 +324,18 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
         if (other.gameObject.tag == "Weapon")
         {
-            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
+            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName == null)
+            {
+                return;
+
+            }
+            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName == null ||
+                other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
             {
                 return;
             }
+                    Debug.Log("当たった！");
+
             //DamageManagerを持つコライダーにぶつかった際に攻撃を受ける
             DamageManager damageManager = other.GetComponent<DamageManager>();
             if (damageManager != null)

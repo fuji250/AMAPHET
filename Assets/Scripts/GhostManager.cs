@@ -34,6 +34,8 @@ public class GhostManager : MonoBehaviourPunCallbacks
     public Transform barrierCheckPoint;//地面に向けてレイを飛ばすオブジェクト 
     public LayerMask barrierLayers;//地面だと認識するレイヤー 
 
+    public GameObject attackEffect;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -158,7 +160,8 @@ public class GhostManager : MonoBehaviourPunCallbacks
 
         if (other.gameObject.tag == "Weapon")
         {
-            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
+            if (other.transform.root.gameObject.GetPhotonView().Owner.NickName == null ||
+                other.transform.root.gameObject.GetPhotonView().Owner.NickName ==photonView.Owner.NickName)
             {
                 return;
             }
