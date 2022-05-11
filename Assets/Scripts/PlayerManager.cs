@@ -63,6 +63,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public Transform barrierCheckPoint;//地面に向けてレイを飛ばすオブジェクト 
     public LayerMask barrierLayers;//地面だと認識するレイヤー 
 
+    public GameObject attackEffect;
+
     private void Awake()
     {
         instance = this;
@@ -188,6 +190,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public  void Attack()
     {
         animator.SetTrigger("Attack");
+        var attackEffectIns = Instantiate<GameObject>(attackEffect, latestPos, transform.rotation);
+        Destroy(attackEffectIns, 1f);
     }
 
     void Defend()

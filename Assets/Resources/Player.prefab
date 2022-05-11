@@ -1552,6 +1552,7 @@ MonoBehaviour:
   barrierLayers:
     serializedVersion: 2
     m_Bits: 4096
+  attackEffect: {fileID: 5103750484102096205, guid: 58604f033e1dc1d45bc576e366963b1a, type: 3}
 --- !u!54 &3407591527352153531
 Rigidbody:
   m_ObjectHideFlags: 0
